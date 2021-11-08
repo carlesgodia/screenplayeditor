@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="description" content="Editor online de guiones para cine gratuito." />
+  <meta name="keywords" content="script editor, guiones, editor de guiones, escribir guion, cine, guion de cine, escribir" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="Carles Gòdia">
+
+  <meta charset="utf-8" />
+
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Editor gratuito de guiones para cine o cortos" />
+  <meta property="og:url" content="https://www.carlesgodia.com/" />
+  <meta property="og:site_name" content="Carles Godia | Editor de guiones" />
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>Editor de guiones</title>
+
+  <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <link href="./css/stylesEditor.css" rel="stylesheet"/>
+  <link href="./css/sb-admin.css" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
+
+  <script src="js/ScreenPlay/scene.js"></script>
+  <script src="js/ScreenPlay/action.js"></script>
+  <script src="js/ScreenPlay/character.js"></script>
+  <script src="js/ScreenPlay/dialogue.js"></script>
+  <script src="js/ScreenPlay/parenthetical.js"></script>
+  <script src="js/ScreenPlay/transition.js"></script>
+
+</head>
+<body id="page-top">
+  <div id="wrapper">
+    <!-- Sidebar -->
+    <ul class="sidebar navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link btn-primary" href="https://www.carlesgodia.com">
+          <i class="fas fa-fw fa-backward"></i>
+          <span>Volver a Carlesgodia.com</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="index.html">
+          <i class="fas fa-fw fa-random"></i>
+          <span>Generar historias</span></a>
+      </li>
+      <li class="nav-item ">
+        <a class="nav-link" href="arquetips.html">
+          <i class="fas fa-fw  fa-users"></i>
+          <span>Generar personajes</span>
+        </a>
+      </li> 
+      <li class="nav-item ">
+        <a class="nav-link" href="dados.html">
+          <i class="fas fa-fw  fa-dice"></i>
+          <span>Tirar dados</span>
+        </a>
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link" href="indexSP.html">
+          <i class="fas fa-fw  fa-edit"></i>
+          <span>Escribir guion</span>
+        </a>
+      </li> 
+    </ul>
+
+    <div id="content-wrapper">
+      <div class="container-fluid">
+        <div class="container mb-3">
+          <div class="row">
+            <div class="col-12 mt-3">
+              <div class="buttons">
+                <form>
+                  <input type="file" id="fileElem" accept=".cgsx" style="display:none" onchange="handleSubmit(this.files)">
+                </form>
+                <button id='import-button' class="btn btn-primary file-upload" onclick="doClick()">Importar </button>  
+                <button class="btn btn-success" id="save-button">Guardar</button>
+                <button class="btn btn-secondary" id="full-screen">Pantalla Completa</button>
+                <button class="btn btn-danger" onclick="printScript()">Imprimir </button>  
+                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#tutorialModal">Tutorial</button>  
+              </div>
+              <div id="editorjs"></div>
+              <pre id="output"></pre>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <footer class="sticky-footer">
+        <div class="container my-auto">
+          <div class="copyright text-center my-auto">
+            <span>carlesgodia.com 
+              &copy;<span id="fecha"></span>
+              <script>
+                var fecha = new Date();
+                var ano = fecha.getFullYear();
+                document.getElementById("fecha").innerHTML = ano;
+              </script>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+<script>
+  const editor = new EditorJS({
+    autofocus: true,
+    hideToolbar: false,
+    tools: {
+      scene: {
+        class: Scene,
+        inlineToolbar: [],
+        shortcut: 'CMD+SHIFT+S',
+      },
+      paragraph: {
+        class: Action,
+        inlineToolbar: [],
+        shortcut: 'CMD+SHIFT+A',
+        config: {
+          titlePlaceholder: 'Title',
+        }
+      },
+      character: {
+        class: Character,
+        inlineToolbar: [],
+        shortcut: 'CMD+SHIFT+C',
+      },
+      dialogue: {
+        class: Dialogue,
+        inlineToolbar: [],
+        shortcut: 'CMD+SHIFT+D',
+      },
+      parenthetical: {
+        class: Parenthetical,
+        inlineToolbar: [],
+        shortcut: 'CMD+SHIFT+Z',
+      },
+      transition: {
+        class: Transition,
+        inlineToolbar: [],
+        shortcut: 'CMD+SHIFT+X',
+      }
+    },
+    data: {
+      time: 1552744582955,
+      blocks: [
+        {
+          type: "scene",
+          data: {
+            text: "1. INT. COMISARÍA – DÍA",
+          }
+        },
+        {
+          type: "paragraph",
+          data: {
+              text: "Una larga cola de personas enfadadas espera dentro de la comisaría para ser atendidas. Sigue sonando la misma canción que en las secuencias anteriores, pero a través de la radio interior de la comisaría. Dos vecinos comentan la situación."
+          }
+        },
+        {
+          type: "character",
+          data: {
+              text: "Manolo"
+          }
+        },
+        {
+          type: "parenthetical",
+          data: {
+              text: "sorprendido"
+          }
+        },
+        {
+          type: "dialogue",
+          data: {
+              text: "¿Tú también vienes a denunciar un robo?"
+          }
+        },
+        {
+          type: "character",
+          data: {
+              text: "Ramón"
+          }
+        },
+        {
+          type: "dialogue",
+          data: {
+              text: "Me lo han robado todo. Todo, menos mi mujer, que ya es mala pata. Ojalá se hubieran llevado a ese par de brujas."
+          }
+        },
+        {
+          type: "character",
+          data: {
+              text: "Manolo"
+          }
+        },
+        {
+          type: "dialogue",
+          data: {
+              text: "¿A quién te refieres? ¿Cuál es la segunda?"
+          }
+        },
+        {
+          type: "character",
+          data: {
+              text: "Ramón"
+          }
+        },
+        {
+          type: "dialogue",
+          data: {
+              text: "Pues la suegra. Seguro que dejó pasar a los ladrones, solo para fastidiar."
+          }
+        },
+        {
+          type: "paragraph",
+          data: {
+              text: "Dentro de la comisaría se oye un ruido muy fuerte. Todos se giran para ver qué ha pasado."
+          }
+        },
+        {
+          type: "scene",
+          data: {
+            text: "2. INT. COMISARÍA - DÍA",
+          }
+        },
+        {
+          type: "paragraph",
+          data: {
+              text: "Se ve un policía novato que ha tropezado dejando caer todo el café sobre la camisa del comisario."
+          }
+        },
+        {
+          type: "character",
+          data: {
+              text: "FRANCISCO"
+          }
+        },
+        {
+          type: "parenthetical",
+          data: {
+              text: "enfadado"
+          }
+        },
+        {
+          type: "dialogue",
+          data: {
+              text: "La madre que te... ¡Suárez! Te voy a matar."
+          }
+        },
+        {
+          type: "transition",
+          data: {
+              text: "DISOLVE TO:"
+          }
+        }
+      ],
+      version: "2.22.2"
+    },
+    i18n: {
+      messages: {
+        ui: {
+        "blockTunes": {
+          "toggler": {
+            "Click to tune": "Clic para enfocar",
+            "or drag to move": "Arrastra y mueve"
+          }
+        },
+        "inlineToolbar": {
+          "converter": {
+            "Convert to": "Convertir a"
+          }
+        },
+        "toolbar": {
+          "toolbox": {
+            "Add": "Añadir"
+          }
+        }
+      },
+      toolNames:{
+        "Scene": "Escena",
+        "Action": "Acción",
+        "Character": "Personaje",
+        "Dialogue": "Dialogo",
+        "Parenthetical": "Panréntesis",
+        "Transition": "Transición",
+      },
+      blockTunes: {
+        "delete": {
+          "Delete": "Borrar"
+        },
+        "moveUp": {
+          "Move up": "Mover arriba"
+        },
+        "moveDown": {
+          "Move down": "Mover abajo"
+        }
+      },
+    }
+  }
+});
+  
+  const saveButton = document.getElementById('save-button');
+  const fullScreen = document.getElementById('full-screen');
+  const output = document.getElementById('output');
+
+  saveButton.addEventListener('click', () => {
+    editor.save().then( savedData => {
+      var dataJson = JSON.stringify(savedData, null, 4);
+
+      var fecha = new Date();
+      var hours = fecha.getHours();
+      var minutes = fecha.getMinutes();
+      var nameFile = "Guion_"+hours+"_"+minutes+".cgsx";
+      
+      download(dataJson, nameFile, 'text/plain');
+      //console.log(savedData.blocks[1].data.text);
+    })
+  });
+
+  function download(content, fileName, contentType) {
+      var a = document.createElement("a");
+      var file = new Blob([content], {type: contentType});
+      a.href = URL.createObjectURL(file);
+      a.download = fileName;
+      a.click();
+  }
+  
+  fullScreen.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      
+      fullScreen.innerText="Salir de pantalla completa";
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen(); 
+      }
+      fullScreen.innerText="Pantalla Completa";
+    }
+  });
+
+  function doClick() {
+    var el = document.getElementById("fileElem");
+    if (el) {
+      el.click();
+    }
+  }
+
+  let form = document.querySelector('#upload');
+  let file = document.querySelector('#fileElem');
+
+  function handleSubmit (event) {
+    event.preventDefault;
+    if (!file.value.length) return;
+    let reader = new FileReader();
+    reader.onload = logFile;
+    reader.readAsText(file.files[0]);
+  }
+
+  function logFile (event) {
+    let str = event.target.result;
+    let json = JSON.parse(str);
+
+    editor.render(json);
+  }
+
+  function printScript() {    
+    var newDiv = document.createElement("p");
+    var newContent = document.createTextNode("Creado con el editor de Carlesgodia.com");
+    newDiv.appendChild(newContent); 
+    newDiv.classList.add("signature");
+   
+    var printContents = document.getElementById("editorjs");
+  	printContents = printContents.innerHTML;    
+    var originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContents;
+    document.body.insertBefore(newDiv, document.body.firstElementChild);
+
+    window.print();
+    //document.body.innerHTML = originalContents;
+    location.reload();
+
+ }
+
+ window.onload = function() {
+  var myModal = new bootstrap.Modal(document.getElementById('tutorialModal'), {})
+  //myModal.toggle()
+}; 
+ 
+</script>
+
+<div class="modal fade" id="tutorialModal" tabindex="-1" aria-labelledby="tutorialModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Tutorial del editor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h5>Bienvenido al editor de guiones</h5>
+        <p>Para empezar tienes un modelo de ejemplo que puedes modificar a tu gusto.</p>
+        <img src="Tutorial1.png" alt="editor de quiones free" width="500px"/>
+        <p><b>Aprieta TAB</b> cada vez que quieras cambiar de bloque. Utiliza las flechas para moverte entre los diferentes bloques y así avanzar más.</p>
+        <img src="Tutorial2.png" alt="editor de guiones" width="700px"/>
+        <p>Puedes mover los bloques a tu antojo para ordenar parágrafos.</p>
+        <p>Puedes guardar en formato CGSX (es un JSON).</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
